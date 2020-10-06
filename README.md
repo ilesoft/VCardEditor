@@ -2,7 +2,7 @@
 
 VCardEditor on ohjelma, joka lukee, muokkaa, "siivoaa" ja tallentaa yhteystietoja
 vcf.-tiedostomuodossa eli Vcard-formaatissa. (https://tools.ietf.org/html/rfc6350)
-Tallennetut numerot voidaan siirtää esimerkiksi takaisin puheimeen, mikäli puhelin tätä
+Tallennetut numerot voidaan siirtää takaisin puhelimeen, mikäli puhelin tätä
 tukee. VCardEditor käy myös hyvin varmuuskopioiden tekemiseen ja ylläpitoon, sillä
 duplikaatti-yhteystietoja ei voida samalla nimellä luoda tai tallentaa. On myös
 mahdollista poistaa Suomen suuntanumerot yhteystiedoista, jolloin yhteystietojen käsittely
@@ -40,7 +40,3 @@ Delete: Poistaa yhteystiedon
 - Mikäli yrittää tallentaa tyhjää nimi- tai puhelinnumerokenttää, ohjelma poistaa
 kyseiset tiedot.
 - Esimerkkiyhteystietoja ei pysty tallentamaan.
-
-Tekijä:
-Ilmari Marttila
-ilmari.marttila@tuni.fi
