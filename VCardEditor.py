@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 # TIE-02100-S2017 Johdatus ohjelmointiin
-# Ilmari Marttila, ilmari.marttila@tuni.fi
-# opiskelijanumero:265040
-# Tehtävän 13.11 ratkaisu.
-# Taso: skaalautuva, koska numeroita ja meiliosoitteita voi lisätä
-# mielivaltaisen määrän.
-# Status: READY
-# Ohjelman dokumentaatio ja kuvaus löytyy README.md-tiedostosta tai
-# käyttöliittymän Help-toiminnon takaa.
 
 # Tämä tiedosto sisältää luokan, jolla käyttöliittymän luodaan
 
@@ -215,7 +207,6 @@ class Vcard_GUI:
             """
             Kun editointi-ikkunaa yritetään sulkea raksista tai painamalla
             Escape-näppäintä, kysytään, haluaako käyttäjä tallentaa.
-            :param event:
             :return:
             """
             want_save = messagebox.askyesno('Oops', 'Want to save?',
@@ -361,7 +352,6 @@ class Vcard_GUI:
         Metodi kerää omaan sanakirjaansa ne yhteystieto-oliot, jotka sopivat
         annettuun hakusanaan, ja kutsuu sen jälkeen uptade-metodia, joka
         päivittää listboxiin hakutulokset.
-        :param event:
         :return:
         """
         search_result = {}

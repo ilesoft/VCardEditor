@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 # TIE-02100-S2017 Johdatus ohjelmointiin
-# Ilmari Marttila, ilmari.marttila@student.tut.fi
-# opiskelijanumero:265040
-# Tehtävän 13.11 ratkaisu.
-# Taso: skaalautuva, koska numeroita ja meiliosoitteita voi lisätä
-# mielivaltaisen määrän.
-# Status: READY
-# Ohjelman dokumentaatio ja kuvaus löytyy README.txt-tiedostosta tai
-# käyttöliittymän Help-toiminnon takaa.
 
 # Tämä tiedosto sisältää funktiot, joita tarvitaan ohjelmassa Vcard-editor
 # yhteystietojen lukemiseen vcf-tiedostosta ja kirjoittamiseen valittuun
