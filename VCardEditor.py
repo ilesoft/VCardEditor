@@ -48,11 +48,9 @@ class Vcard_GUI:
 
         # Luodaan hakukenttä.
         self.__search_frame = Frame()
-        self.__search_button = Button(self.__search_frame, text='Search',
-                                      command=self.search)
+        self.__search_button = Button(self.__search_frame, text='Search', command=self.search)
         self.__search_entry = Entry(self.__search_frame)
-        self.__clear_search_button = Button(self.__search_frame, text='X',
-                                     command=self.clear_search)
+        self.__clear_search_button = Button(self.__search_frame, text='X', command=self.clear_search)
         self.__how_many_label = Label(self.__search_frame, text=' 0 contacts ')
 
         self.__how_many_label.pack(side='right')
@@ -66,7 +64,7 @@ class Vcard_GUI:
         self.__listbox.pack(side='left', fill=BOTH, expand='1')
 
         # Lista sanakirjoista, johon yhteystiedot tallennetaan.
-        self.__contact_files = {}
+        self.__contacts = {}
 
         # Bindings for editing contact.
         self.__listbox.bind('<Return>', self.edit_text)
@@ -98,26 +96,25 @@ class Vcard_GUI:
             return
 
         self.__edit_window = Toplevel()
-        self.__edit_window.title('Edit Contact')
+        self.__edit_window.title('Edit')
         self.__edit_window.geometry('400x150')
         self.__edit_window.attributes('-topmost', 'true')
         self.__edit_window['bg'] = 'gray20'
+        self.__edit_window.transient()
+        self.__edit_window.wait_visibility()
         self.__edit_window.grab_set()
         if new:
             # Luotaessa uutta kontaktia, mennään tästä.
-            self.__contact_object = Contact('Name')
-            self.__contact_files['Name'] = self.__contact_object
-            self.update()
+            self.__contact_object = Contact('')
         else:
             # Muokatessa vanhaa kontaktia, mennään tästä.
             name_and_others = self.__listbox.get(self.__listbox.curselection())
             name = name_and_others.split('|')[0].strip()
-            self.__contact_object = self.__contact_files[name]
+            self.__contact_object = self.__contacts[name]
 
         name_label = Label(self.__edit_window, text='{:8>s}'.format('Name:'))
         name_label.grid(row=0, column=0, sticky=W + E)
         tel_label = Label(self.__edit_window, text='{:8>s}'.format('Phone:'))
-        email_label = Label(self.__edit_window, text='{:8>s}'.format('Email:'))
 
         def save():
             """
@@ -127,77 +124,38 @@ class Vcard_GUI:
             """
             # Täytyy tutkia onko samalla nimellä jo tietoja
             new_fn = name_entry.get()
-            old_fn = self.__contact_object.get_info(type='fn')
-            if new_fn == '':
-                new_fn = 'Unnamed'
-            if new_fn in self.__contact_files and new_fn != old_fn:
-                yes = messagebox.askyesno('Name already exist',
-                        'Previous data will vanish!\nDo you want to do that?')
+            old_fn = self.__contact_object.fn
+
+            if new_fn in self.__contacts and new_fn != old_fn:
+                yes = messagebox.askyesno('Name already exist', 'Previous data will vanish!\nDo you want to do that?')
 
                 if yes:
-                    del self.__contact_files[new_fn]
-                    self.__contact_files[new_fn] = self.__contact_files.pop(old_fn)
-                    self.__contact_object = self.__contact_files[new_fn]
+                    del self.__contacts[new_fn]
+                    self.__contacts[new_fn] = self.__contacts.pop(old_fn)
+                    self.__contact_object = self.__contacts[new_fn]
                     self.__contact_object.change_names(new_fn)
                     self.update()
 
-            elif new_fn != old_fn:
-                self.__contact_files[new_fn] = self.__contact_files.pop(old_fn)
-                self.__contact_object = self.__contact_files[new_fn]
+            elif new and not new_fn in self.__contacts:
+                self.__contacts[new_fn] = self.__contact_object
                 self.__contact_object.change_names(new_fn)
 
-            # Tarkastetaan onko syötetty muita kuin numeroita.
-            for tel in tel_entrys:
-                if not tel.get()[1:].isdigit():
-                    messagebox.showerror('Error', 'Number must be number!\nGet it?',
-                                         parent=self.__edit_window)
-                    return
+            elif new_fn != old_fn:
+                self.__contacts[new_fn] = self.__contacts.pop(old_fn)
+                self.__contact_object = self.__contacts[new_fn]
+                self.__contact_object.change_names(new_fn)
 
-            # Tarkastetaan mitä meilikenttään on syötetty.
-            for email in email_entrys:
-                if email.get().isdigit():
-                    messagebox.showerror('Error', "Email can't be number!",
-                                         parent=self.__edit_window)
-                    return
 
-            self.__contact_object.clear(tel=True, email=True)
+            self.__contact_object.clear(tel=True)
 
-            # Poistetaan turhat tel-entry-kentät
-            removable = []
-            index = 0
             for tel in tel_entrys:
                 number = tel.get()
                 if not number[1:].isdigit():
-                    messagebox.showerror('Error', 'It meant phone NUMBER!')
-                    return
-                if number == '+0000000000' or number == '':
-                    tel.grid_remove()
-                    removable.append(index)
-                    number = ''
+                    continue
+                if number == '':
+                    continue
 
-                if number != '':
-                    int(number[1:])
-                    self.__contact_object.add(number)
-                    index += 1
-
-            if len(removable) != 0:
-                for removable_num in removable:
-                    del tel_entrys[removable_num]
-
-            # Poistetaan turhat email-entry-kentät
-            removable = []
-            index = 0
-            for email in email_entrys:
-                adress = email.get()
-                if adress == 'example@email.com' or adress == '':
-                    email.grid_remove()
-                    removable.append(index)
-                    adress = ''
-                self.__contact_object.add(adress)
-                index += 1
-            if len(removable) != 0:
-                for removable_email in removable:
-                    del email_entrys[removable_email]
+                self.__contact_object.add(number)
 
             update_edit_window()
             # Päivitetään listboxi
@@ -209,8 +167,7 @@ class Vcard_GUI:
             Escape-näppäintä, kysytään, haluaako käyttäjä tallentaa.
             :return:
             """
-            want_save = messagebox.askyesno('Oops', 'Want to save?',
-                                            parent=self.__edit_window)
+            want_save = messagebox.askyesno('Oops', 'Want to save?', parent=self.__edit_window)
             if want_save:
                 ok_button.invoke()
             else:
@@ -218,8 +175,7 @@ class Vcard_GUI:
 
         save_button = Button(self.__edit_window, text='Save', command=save)
         self.__edit_window.bind('<Control-s>', lambda event: save_button.invoke())
-        ok_button = Button(self.__edit_window, text='OK',
-                           command=lambda: [save(), self.__edit_window.destroy()])
+        ok_button = Button(self.__edit_window, text='OK', command=lambda: [save(), self.__edit_window.destroy()])
         self.__edit_window.bind('<Escape>', want_to_save)
         self.__edit_window.protocol("WM_DELETE_WINDOW", want_to_save)
 
@@ -233,67 +189,42 @@ class Vcard_GUI:
         name_entry = Entry(self.__edit_window)
 
         # Luodaan Entry-kentät puhelinnumeroille.
-        tels = self.__contact_object.get_info(type='tel')
+        tels = self.__contact_object.tel
         tel_entrys = []
         for i in range(len(tels)):
             tel_entrys.append(Entry(self.__edit_window))
 
-        # Luodaan Entry-kentätä meileille.
-        emails = self.__contact_object.get_info(type='email')
-        email_entrys = []
-        for i in range(len(emails)):
-            email_entrys.append(Entry(self.__edit_window))
-
         def add_tel_entry():
             # Lisätään uusi yhteystietokenttä, jos se on järkevää
-            save()
-            if '+0000000000' not in self.__contact_object.get_info(type='tel'):
-                self.__contact_object.add('+0000000000')
-                tel_entrys.append(Entry(self.__edit_window))
-            update_edit_window()
-
-        def add_email_entry():
-            # Lisätään uusi yhteystietokenttä, jos se on järkevää
-            save()
-            if 'example@email.com' not in \
-                    self.__contact_object.get_info(type='email'):
-                self.__contact_object.add('example@email.com')
-                email_entrys.append(Entry(self.__edit_window))
-            update_edit_window()
+            # save()
+            # if '' not in self.__contact_object.tel:
+            #     self.__contact_object.add('')
+            tel_entrys.append(Entry(self.__edit_window))
+            tel_entrys[0].insert(0, '')
+            tel_entrys[0].grid(row=1, column=1 + 0, sticky=W + E)
 
         add_telb = Button(self.__edit_window, text='+', command=add_tel_entry)
-        add_emailb = Button(self.__edit_window, text='+',
-                            command=add_email_entry)
 
         def update_edit_window():
             # Päivitetään editointi-ikkuna
             tel_label.grid(row=1, column=0, sticky=W + E)
-            email_label.grid(row=2, column=0, sticky=W + E)
             save_button.grid(row=3, column=2)
             ok_button.grid(row=3, column=3)
             delete_button.grid(row=3, column=1)
 
             name_entry.delete(0, 'end')
-            name_entry.insert(0, self.__contact_object.get_info(type='fn'))
+            name_entry.insert(0, self.__contact_object.fn)
             name_entry.grid(row=0, column=1, sticky=W + E)
 
             # Päivitetään puhelinnumerot.
             i = 0
-            for tel in tel_entrys:
-                tel.delete(0, 'end')
-                tel.insert(0, self.__contact_object.get_info(type='tel')[i])
-                tel.grid(row=1, column=1 + i, sticky=W + E)
-                i += 1
+            if len(self.__contact_object.tel) > 0:
+                for tel in tel_entrys:
+                    tel.delete(0, 'end')
+                    tel.insert(0, self.__contact_object.tel[i])
+                    tel.grid(row=1, column=1 + i, sticky=W + E)
+                    i += 1
             add_telb.grid(row=1, column=1 + i, sticky=W)
-
-            # Päivitetään meilit.
-            i = 0
-            for email in email_entrys:
-                email.delete(0, 'end')
-                email.insert(0, self.__contact_object.get_info(type='email')[i])
-                email.grid(row=2, column=1 + i, sticky=W + E)
-                i += 1
-            add_emailb.grid(row=2, column=1+i, sticky=W)
 
         update_edit_window()
 
@@ -323,15 +254,12 @@ class Vcard_GUI:
             # Lisätään uudet yhteystiedot sanakirjaan mikäli eivät siellä vielä ole
             # yt = yhteystieto
             for yt in files_read:
-                if yt in self.__contact_files:
+                if yt in self.__contacts:
 
-                    for number in files_read[yt].get_info(type='tel'):
-                        self.__contact_files[yt].add(number)
-
-                    for email in files_read[yt].get_info(type='email'):
-                        self.__contact_files[yt].add(email)
+                    for number in files_read[yt].tel:
+                        self.__contacts[yt].add(number)
                 else:
-                    self.__contact_files[yt] = files_read[yt]
+                    self.__contacts[yt] = files_read[yt]
 
             # Päivitetään myöskin pääikkuan listboxi, jotta se pysyy ajan
             # tasalla
@@ -341,7 +269,7 @@ class Vcard_GUI:
 
     def save_as(self, event=None):
         # Tallentaa muokattavat yhteystiedot valittuun tiedotoon.
-        filewriter(self.__contact_files)
+        filewriter(self.__contacts)
 
     def new_contact(self, event=None):
         # Luo uuden yhteystiedon, jota ruvetaan heti muokkaamaan.
@@ -362,13 +290,13 @@ class Vcard_GUI:
             return
 
         # Käydään läpi kaikki yhteystiedot ja etsitään hakusanaa.
-        for contact in self.__contact_files:
-            search_string = self.__contact_files[contact].get_info(type='search')
+        for contact in self.__contacts:
+            search_string = self.__contacts[contact].search_string
             if search_word in search_string or\
                     search_word.capitalize() in search_string or\
                     search_word.upper() in search_string or\
                     search_word.lower() in search_string:
-                search_result[contact] = self.__contact_files[contact]
+                search_result[contact] = self.__contacts[contact]
 
         self.update(search=True, search_dict=search_result)
         # Aktivoidaan ensimmäinen haktulos valmiiksi käytön nopeuttamiseksi.
@@ -406,21 +334,17 @@ class Vcard_GUI:
         if search:
             for_listbox = search_dict
         else:
-            for_listbox = self.__contact_files
+            for_listbox = self.__contacts
 
         index = 0
         for name in sorted(for_listbox, key=lambda name: name.upper()):
-            number = self.__contact_files[name].get_info(type='tel')
-            email = self.__contact_files[name].get_info(type='email')
+            number = self.__contacts[name].tel
 
             # jos tietyt tietueet ovat tyhjiä niiden paikalle näytetään tyhjää.
-            if email == []:
-                email = ['']
             if number == []:
                 number = ['']
 
-            shown = '{:30s}|{:30s}|{:}'.format(name, ' | '.join(number),
-                                            ' | '.join(email))
+            shown = '{:60s}|{:30s}'.format(name, ' | '.join(number))
             self.__listbox.insert(index, shown)
             index += 1
 
@@ -451,11 +375,11 @@ class Vcard_GUI:
         :param object: Poistettava yhteystieto.
         :return: None
         """
-        key_to_remove = object.get_info(type='fn')
+        key_to_remove = object.fn
         if messagebox.askyesno('Deleting contact', 'Do you want to delete '
                                                       + 'this contact?',
                                parent=self.__edit_window):
-            del self.__contact_files[key_to_remove]
+            del self.__contacts[key_to_remove]
             self.update()
         else:
             return
@@ -465,8 +389,8 @@ class Vcard_GUI:
         Poistaa suomen suuntanumern kaikista yhteystiedoista.
         :return: None
         """
-        for contact in self.__contact_files:
-            self.__contact_files[contact].remove_area_code()
+        for contact in self.__contacts:
+            self.__contacts[contact].remove_area_code()
         self.update()
 
     def help(self):

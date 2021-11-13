@@ -20,7 +20,7 @@ def filereader(path):
     vcf_file.close()
 
     # Sanakirja, johon hyväksi havaitut yhteystiedot kirjataan
-    # formaatissa {...,nimi:yhteystieto-olio,...}
+    # formaatissa {nimi:yhteystieto-olio,...}
     contacts_dict = {}
 
     # lippu, joka kertoo edellisen quoted_printable yhteystiedon jääneen kesken.
@@ -29,20 +29,13 @@ def filereader(path):
     # kesken jäänyt nimi
     kesken = ''
 
-    email = ''
     tel = ''
     for row in file_in_list:
-        # otetaan huomioon kesken jääneet quoted_printaplet
-        if onko_kesken == 1 and row.startswith('='):
-            onko_kesken = 0
-            row = row.strip()
-            fn = quopri.decodestring(kesken + row[1:])
-            fn = fn.decode('utf-8')
-            fn = fn.strip()
 
         # Kaapataan uuden yhteystiedon alku.
-        elif 'BEGIN:VCARD' in row or 'begin:vcard' in row:
-            new_contact = [[],[]]
+        if 'BEGIN:VCARD' in row or 'begin:vcard' in row:
+            telephone_numbers = []
+            continue
 
         elif row[:2] == 'FN' or row[:2] == 'fn':
             fn_raw = row[2:]
@@ -58,6 +51,7 @@ def filereader(path):
                 fn = quopri.decodestring(fn)
                 fn = fn.decode('utf-8')
             fn = fn.strip()
+            continue
 
         elif row[:3] == 'TEL':
             tel_raw = row[3:]
@@ -76,35 +70,32 @@ def filereader(path):
             tel = tel.strip('\u202c')
 
             tel = tel.strip()
-            if tel not in new_contact[0]:
-                new_contact[0].append(tel)
-
-        elif row[:5] == 'EMAIL':
-            email_raw = row[5:]
-            email = email_raw.split(':')
-            email = email[len(email) - 1]
-            email = email.strip()
-            if email not in new_contact[1]:
-                new_contact[1].append(email)
+            if tel not in telephone_numbers:
+                telephone_numbers.append(tel)
+            continue
 
         # Kaapataan yhteystiedon loppu ja tallennetaan se
         elif 'END:VCARD' in row or 'end:vcard' in row:
 
             # Tarkastellaan mahdolliset duplikaatit ja tallennetaan
-            #  tiedot sanakirjaan
+            # tiedot sanakirjaan
             if fn not in contacts_dict:
-                contacts_dict[fn] = Contact(fn, emails=new_contact[1],
-                                            tels=new_contact[0])
+                contacts_dict[fn] = Contact(fn, tels=telephone_numbers)
 
             else:
                 if  not tel=='':
                     contacts_dict[fn].add(tel)
-                if not email=='':
-                    contacts_dict[fn].add(email)
             # Alustetaan muuttujat tyhjiksi, jottei mennä tiedoissa sekaisin.
             tel = ''
-            email = ''
             fn = ''
+
+        # otetaan huomioon kesken jääneet quoted_printaplet
+        elif onko_kesken == 1:
+            onko_kesken = 0
+            row = row.strip()
+            fn = quopri.decodestring(kesken + row[1:])
+            fn = fn.decode('utf-8')
+            fn = fn.strip()
 
 
     return contacts_dict
@@ -116,14 +107,10 @@ def filewriter(contact_files):
                                    ("text-file","*.txt")))
     new_vcf_file = open(new_vcf_file_path, 'w', encoding='utf-8')
     for contact in sorted(contact_files, key=lambda name: name.upper()):
-        print('BEGIN:VCARD\nVERSION:3.0',
-                file=new_vcf_file)
-        print('FN:', contact_files[contact].get_info(type='fn'),
-                sep='',file=new_vcf_file)
-        for tel in contact_files[contact].get_info(type='tel'):
+        print('BEGIN:VCARD\nVERSION:3.0', file=new_vcf_file)
+        print('FN:', contact_files[contact].fn, sep='',file=new_vcf_file)
+        for tel in contact_files[contact].tel:
             print('TEL;TYPE=VOICE;VALUE=text:', tel, sep='', file=new_vcf_file)
-        for email in contact_files[contact].get_info(type='email'):
-            print('EMAIL:', email, sep='', file=new_vcf_file)
 
         print('END:VCARD', file=new_vcf_file)
 
