@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# TIE-02100-S2017 Johdatus ohjelmointiin
-
-# Tämä tiedosto sisältää funktiot, joita tarvitaan ohjelmassa Vcard-editor
-# yhteystietojen lukemiseen vcf-tiedostosta ja kirjoittamiseen valittuun
-# tiedostoon.
-
 import quopri
 from yhteystieto import Contact
 from tkinter import filedialog

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# TIE-02100-S2017 Johdatus ohjelmointiin
-
 class Contact:
     def __init__(self, name, tels=[]):
         # formatted name

@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# TIE-02100-S2017 Johdatus ohjelmointiin
-
-# Tämä tiedosto sisältää luokan, jolla käyttöliittymän luodaan
-
 from functions import filereader, filewriter
 from yhteystieto import Contact
 from tkinter import filedialog, messagebox
