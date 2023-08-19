@@ -1,5 +1,5 @@
 import quopri
-from yhteystieto import Contact
+from contact import Contact
 from tkinter import filedialog
 
 
