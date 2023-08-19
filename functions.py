@@ -16,7 +16,7 @@ def filereader(path):
     contacts_dict = {}
 
     # lippu, joka kertoo edellisen quoted_printable yhteystiedon jääneen kesken.
-    onko_kesken = 0
+    onko_kesken = False
 
     # kesken jäänyt nimi
     kesken = ""
@@ -36,7 +36,7 @@ def filereader(path):
             # Mahdollistetaan QUOTED-PRINT-yhteensopivuus
             if "ENCODING=QUOTED-PRINTABLE" in fn_raw:
                 if fn.endswith("="):
-                    onko_kesken = 1
+                    onko_kesken = True
                     kesken = fn
                     continue
                 fn = quopri.decodestring(fn)
@@ -80,8 +80,8 @@ def filereader(path):
             fn = ""
 
         # otetaan huomioon kesken jääneet quoted_printaplet
-        elif onko_kesken == 1:
-            onko_kesken = 0
+        elif onko_kesken:
+            onko_kesken = False
             row = row.strip()
             fn = quopri.decodestring(kesken + row[1:])
             fn = fn.decode("utf-8")
