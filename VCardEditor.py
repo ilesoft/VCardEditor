@@ -404,16 +404,23 @@ class Vcard_GUI:
         help_window.attributes('-topmost', 'true')
         help_window['bg'] = 'gray20'
 
-        # Infotekstit
-        try:
-            info_file = open('README.md', 'r', encoding='utf-8')
-            info_text = ''
-            for row in info_file:
-                info_text += row
-            info_file.close()
-        except:
-            info_text = 'Error while reading README-file. It can be moved\n'\
-                                    + 'or removed from the programs folder'
+        info_text = """
+Komennot pääikkunassa
+
+- ctrl-N: Luo uuden yhteystiedon
+- ctrl-F: Aloittaa haun yhteystiedoista
+- Enter: Yhteystiedon ollessa valittuna avaa muokkausikkunan yhteystiedon muokkausta varten
+- ctrl-E tai kaksoisklikkaus halutun yhteystiedon päällä: avaa yhteystiedon muokattavaksi
+- ctrl-O: Avaa tiedosto -ikkuna aukeaa, jolloin saa avattua vanhan yhteystietotiedoston muokkausta varen.
+- ctrl-S: Avaa tallenna nimellä -ikkunan.
+- delete: Yhteystiedon ollessa valittuna poistaa yhteystiedon
+
+Komennot yhteystiedon muokkaus -ikkunassa
+
+- ctrl-S: Tallentaa syötetyt tiedot
+- Esc: Sulkee muokkausikkunan
+- Delete: Poistaa yhteystiedon"""
+
         infolabel = Label(help_window, text=info_text,
                                  bg='gray20', fg='gray70', justify=LEFT,
                           font=('Helvetica', 8))
