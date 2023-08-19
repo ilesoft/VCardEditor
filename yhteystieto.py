@@ -9,7 +9,7 @@ class Contact:
             self.tel.append(str(phone_number))
 
         # Tallennetaan listaan nimen osat hakutoimintoja varten.
-        self.search_string = name + ''.join(self.tel)
+        self.search_string = name + "".join(self.tel)
 
     def change_names(self, new_fn):
         """
@@ -18,7 +18,7 @@ class Contact:
         :return: None
         """
         self.fn = new_fn
-        self.search_string = new_fn+''.join(self.tel)
+        self.search_string = new_fn + "".join(self.tel)
 
     def clear(self, tel=False, fn=False):
         """
@@ -30,7 +30,7 @@ class Contact:
         if tel:
             self.tel.clear()
         if fn:
-            self.fn = ''
+            self.fn = ""
 
     def add(self, param):
         """
@@ -38,7 +38,7 @@ class Contact:
         :return: False, jos oli duplikaatti, None jos ei lisättävää ja
         onnistuessa True.
         """
-        if param == '':
+        if param == "":
             return
         try:
             # try-lohkoon toiminta, joka suoritetaan mikäli kyseessä on numero.
@@ -47,8 +47,8 @@ class Contact:
             if param in self.tel:
                 return False
 
-            if '' in self.tel:
-                self.tel.remove('')
+            if "" in self.tel:
+                self.tel.remove("")
 
             self.tel.append(param)
             return True
@@ -66,9 +66,9 @@ class Contact:
         self.tel = []
         index = 0
         for number in old_list:
-            if number[:4] == '+358':
-                if '0' + number[4:] not in self.tel:
-                    self.tel.append('0' + number[4:])
+            if number[:4] == "+358":
+                if "0" + number[4:] not in self.tel:
+                    self.tel.append("0" + number[4:])
 
             elif number not in self.tel:
                 self.tel.append(number)
